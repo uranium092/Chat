@@ -2,6 +2,8 @@
 
 Este proyecto es un chat de conversación local que permite a los usuarios comunicarse entre sí dentro de la misma máquina.
 
+**Tecnologías Utilizadas:** Java, Sockets, Threads, Swing.
+
 ## Funcionalidades principales
 
 * **Inicio de sesión:**
