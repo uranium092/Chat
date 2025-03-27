@@ -3,8 +3,6 @@ package app;
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -14,30 +12,30 @@ public class Server  {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		MarcoServidor mimarco=new MarcoServidor();
+		ServerFrame view=new ServerFrame();
 		
-		mimarco.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			
 	}	
 }
 
-class MarcoServidor extends JFrame{
-	private class Thread_Between implements Runnable{ // Recibir y enviar mensaje a destinatario
+class ServerFrame extends JFrame{
+	private class Thread_Between implements Runnable{
 		public void run() {
 			try {
-				ServerSocket serverBtt=new ServerSocket(9090);
+				ServerSocket serverListener=new ServerSocket(9090);
 				while(true) {
-					Socket conn=serverBtt.accept();
-					ObjectInputStream input=new ObjectInputStream(conn.getInputStream());
+					Socket connection=serverListener.accept();
+					ObjectInputStream input=new ObjectInputStream(connection.getInputStream());
 					PackData data=(PackData)input.readObject();
-					areatexto.append("\n"+"- Conexión: De '"+data.getFromU()+"' para '"+data.getTo()+"'");
+					textField.append("\n"+"- From '"+data.getFromU()+"' to '"+data.getTo()+"'");
 					Socket sendData=new Socket("",getToUser(data.getTo()));
 					ObjectOutputStream outObj=new ObjectOutputStream(sendData.getOutputStream());
 					outObj.writeObject(data);
 					outObj.close();
 					sendData.close();
 					input.close();
-					conn.close();
+					connection.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -50,25 +48,24 @@ class MarcoServidor extends JFrame{
 		}
 		return -1; 
 	}
-	private String nick, ip, mensaje;
 	private HashMap<String,Integer>Users; 
-	public MarcoServidor(){
+	public ServerFrame(){
 		
 		setBounds(600,300,280,350);				
 			
-		JPanel milamina= new JPanel();
+		JPanel panel= new JPanel();
 		
-		milamina.setLayout(new BorderLayout());
+		panel.setLayout(new BorderLayout());
 		
-		areatexto=new JTextArea();
-		areatexto.setBackground(Color.black);
-		areatexto.setForeground(Color.white);
-		areatexto.setEditable(false);
-		JScrollPane scroll=new JScrollPane(areatexto);
+		textField=new JTextArea();
+		textField.setBackground(Color.black);
+		textField.setForeground(Color.white);
+		textField.setEditable(false);
+		JScrollPane scroll=new JScrollPane(textField);
 		
-		milamina.add(scroll,BorderLayout.CENTER);
+		panel.add(scroll,BorderLayout.CENTER);
 		
-		add(milamina);
+		add(panel);
 		
 		Users=new HashMap<String,Integer>();
 		
@@ -80,29 +77,28 @@ class MarcoServidor extends JFrame{
 		Thread communication=new Thread(new Thread_Between());
 		communication.start();
 		
-		}
-	private class ThreadON_OFF implements Runnable{ // registrar usuario online / offline
+	}
+	private class ThreadON_OFF implements Runnable{ // set online / offline user
 		public void run() {
 			try {
 				ServerSocket server=new ServerSocket(7777);
 				while(true) {
 					ArrayList<String>NewUsers=new ArrayList<String>();
-					Socket sock=server.accept();
-					ObjectInputStream in=new ObjectInputStream(sock.getInputStream());
+					Socket connection=server.accept();
+					ObjectInputStream in=new ObjectInputStream(connection.getInputStream());
 					State ObjIn=(State)in.readObject();
 					if(ObjIn.getOnOff()) {
 						Users.put(ObjIn.getUsername(),ObjIn.getPort());
-						areatexto.append("\n"+ObjIn.getUsername()+"-> ONLINE");
+						textField.append("\n"+ObjIn.getUsername()+"-> ONLINE");
 					} else {
 						Users.remove(ObjIn.getUsername());
-						areatexto.append("\n"+ObjIn.getUsername()+"-> OFFLINE");
+						textField.append("\n"+ObjIn.getUsername()+"-> OFFLINE");
 					}
 					
-					getNewUsers(NewUsers); //llenar NewUsers
+					getNewUsers(NewUsers);
 					sendNewUsers(NewUsers);
 					in.close();
-					sock.close();
-					
+					connection.close();
 					
 				}
 			} catch (Exception e) {
@@ -114,16 +110,14 @@ class MarcoServidor extends JFrame{
 				x.add(it);	
 			}
 		}	
-		public void sendNewUsers(ArrayList<String>x){
+		public void sendNewUsers(ArrayList<String>data){
 			for(int y:Users.values()) {
 				try {
 					Socket temporalSock=new Socket("127.0.0.1",y);
 					ObjectOutputStream out=new ObjectOutputStream(temporalSock.getOutputStream());
-					out.writeObject(x);
+					out.writeObject(data);
 					out.close();
 					temporalSock.close();
-					
-					
 					//close streams
 				}catch(Exception e) {
 					e.printStackTrace();
@@ -131,5 +125,5 @@ class MarcoServidor extends JFrame{
 			}
 		}
 	}
-	private	JTextArea areatexto;
+	private	JTextArea textField;
 }

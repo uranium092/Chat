@@ -16,12 +16,12 @@ public class Client {
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		String n="";
-		while(n.length()==0){
-			n=JOptionPane.showInputDialog("Nombre Usuario:");
-			if(n==null) System.exit(0);
+		String username="";
+		while(username.length()==0){
+			username=JOptionPane.showInputDialog("Nombre Usuario:");
+			if(username==null) System.exit(0);
 		}
-		frame.Ok(n);
+		frame.Ok(username);
 	}
 
 }
@@ -29,51 +29,60 @@ public class Client {
 
 class ClientFrame extends JFrame{
 	
-	LaminaMarcoCliente milamina;
+	private ClientView view;
+
 	public ClientFrame(){
 		
 		setBounds(600,300,280,390);
 				
-		milamina=new LaminaMarcoCliente();
+		view=new ClientView();
 		
 		
 		setResizable(false);
-		add(milamina);
+		add(view);
 		
 		setVisible(true);
 		}	
 	
-	public void Ok(String x){
-		milamina.Ok(x);
-		LaminaMarcoCliente.WindowAction action=milamina.new WindowAction();
+	public void Ok(String nick){
+		view.Ok(nick);
+		ClientView.WindowAction action=view.new WindowAction();
 		addWindowListener(action);
 	}
 }
 
-class LaminaMarcoCliente extends JPanel{
-	private final int Port;
+class ClientView extends JPanel{
+
+	private final int port;
+	JComboBox<String> ip;
+	JLabel nick;
+	JButton clear;
+  private JTextArea chatField;	
+	private JTextField send;
+	private JButton startSend;
+
 	private class newMenus implements Runnable{
 		public void run() {
 			try {
-				ServerSocket serverS=new ServerSocket(Port);
+				ServerSocket clientListener=new ServerSocket(port);
 				while(true) {
-					Socket sock=serverS.accept();
-					ObjectInputStream inp=new ObjectInputStream(sock.getInputStream());
-					Object target=inp.readObject();
-					if(target instanceof PackData) {
-						PackData source=(PackData)target;
+					Socket connection=clientListener.accept();
+					ObjectInputStream inputStream=new ObjectInputStream(connection.getInputStream());
+					Object object=inputStream.readObject();
+					if(object instanceof PackData) {
+						PackData source=(PackData)object;
 						String FromU=source.getFromU();
 						if(FromU.equals(nick.getText()))FromU+=" (Tú)";
-						campochat.append("\n"+FromU+": "+source.getMessage());
+						chatField.append("\n"+FromU+": "+source.getMessage());
 					}else {
-						ArrayList<String>NewUsers=(ArrayList<String>)target;
+						ArrayList<String>NewUsers=(ArrayList<String>)object;
 						ip.removeAllItems();
 						for(String x:NewUsers) {
 								ip.addItem(x);
 						}
 					}
-					inp.close();
-					sock.close();
+					inputStream.close();
+					connection.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -85,7 +94,7 @@ class LaminaMarcoCliente extends JPanel{
 			try {
 				Socket sockClose=new Socket("",7777);
 				ObjectOutputStream objOut=new ObjectOutputStream(sockClose.getOutputStream());
-				objOut.writeObject(new State(nick.getText(),0,false)); //reason
+				objOut.writeObject(new State(nick.getText(),0,false));
 				objOut.close();
 				sockClose.close();
 			} catch (Exception e1) {
@@ -93,16 +102,13 @@ class LaminaMarcoCliente extends JPanel{
 			}
 		}
 	}
-	JComboBox<String> ip;
-	JLabel nick;
-	JButton clear;
 	public void Ok(String nick){
 		startSend.setEnabled(true);
 		clear.setEnabled(true);
 		this.nick.setText(nick);
 		try {
-			State setOnline=new State(this.nick.getText(),Port,true); 
-			Socket sockOn=new Socket("127.0.0.1",7777);//no existe
+			State setOnline=new State(this.nick.getText(),port,true); 
+			Socket sockOn=new Socket("127.0.0.1",7777);
 			ObjectOutputStream ObjStream=new ObjectOutputStream(sockOn.getOutputStream()); 
 			ObjStream.writeObject(setOnline);
 			ObjStream.close();
@@ -113,25 +119,26 @@ class LaminaMarcoCliente extends JPanel{
 		}
 	}
 	
-	public LaminaMarcoCliente(){
+	public ClientView(){
 		int PortRandom=0;
 		boolean findPort=true;
 		while(findPort) {
 			try {
 				PortRandom=(int)(Math.random()*65536);
 				Socket temporal=new Socket("",PortRandom);
+        temporal.close();
 			}catch(Exception e) {
 				findPort=false;
 			}
 		}
-		Port=PortRandom;
+		port=PortRandom;
 		JLabel shownick=new JLabel("NICK:");
 		add(shownick);
 		nick=new JLabel("");
 		add(nick);
-		JLabel texto=new JLabel("    |  ONLINE:");
+		JLabel text=new JLabel("    |  ONLINE:");
 		
-		add(texto);
+		add(text);
 		
 		ip=new JComboBox<String>(); 
 		
@@ -140,12 +147,12 @@ class LaminaMarcoCliente extends JPanel{
 		Thread receiveUsers=new Thread(new newMenus());
 		receiveUsers.start();
 		
-		campochat=new JTextArea(12,20);
-//		add(campochat);
-		campochat.setEditable(false);
+		chatField=new JTextArea(12,20);
+
+		chatField.setEditable(false);
 		setBackground(new Color(233,246,247));
 	
-		JScrollPane scroll=new JScrollPane(campochat);
+		JScrollPane scroll=new JScrollPane(chatField);
 		add(scroll);
 		
 		send=new JTextField(20);
@@ -160,7 +167,7 @@ class LaminaMarcoCliente extends JPanel{
 		vertical.add(clear);
 		clear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				campochat.setText("");
+				chatField.setText("");
 			}
 		});
 		
@@ -170,7 +177,7 @@ class LaminaMarcoCliente extends JPanel{
 		startSend.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				campochat.append("\n- Tú: "+send.getText()+"   | "+ip.getSelectedItem());
+				chatField.append("\n- Tú: "+send.getText()+"   | "+ip.getSelectedItem());
 				if(ip.getSelectedItem()!=null){
 					try {
 					Socket sendMess=new Socket("127.0.0.1",9090);
@@ -190,22 +197,14 @@ class LaminaMarcoCliente extends JPanel{
 		
 	}
 	
-		
-	private JTextArea campochat;	
-		
-	private JTextField send;
-	
-	private JButton startSend;
-	
-	
 }
 
 class PackData implements Serializable{
 	private String FromUser,message,ToUser;
-	public PackData(String a,String b, String c){
-		FromUser=a;
-		message=b;
-		ToUser=c;
+	public PackData(String from,String message, String to){
+		FromUser=from;
+		this.message=message;
+		ToUser=to;
 	}
 	public String getFromU() {
 		return FromUser;
@@ -223,10 +222,10 @@ class State implements Serializable{
 	private String UserName;
 	private final int Port;
 	private boolean on_off;
-	public State(String a, int b, boolean c){
-		UserName=a;
-		Port=b;
-		on_off=c;
+	public State(String username, int port, boolean state){
+		UserName=username;
+		Port=port;
+		on_off=state;
 	}
 	public String getUsername() {
 		return UserName;
