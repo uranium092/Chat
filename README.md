@@ -1,23 +1,21 @@
 # Chat de Conversación Local
 
-Este proyecto es un chat local que permite a usuarios comunicarse en la misma máquina.
+Este proyecto es un chat de conversación local que permite a los usuarios comunicarse entre sí dentro de la misma máquina.
 
-## Funcionalidades
+## Funcionalidades principales
 
-* **Inicio de sesión:** Usuarios ingresan un nombre para unirse.
-* **Chat:** Envío y recepción de mensajes en tiempo real.
-* **Destinatario:** Selección del usuario al que se envía el mensaje.
-* **Historial:** Registro de mensajes enviados y recibidos.
-* **Limpieza:** Opción para borrar el historial de mensajes.
+* **Inicio de sesión:**
+    * Los usuarios ingresan un nombre de usuario para unirse al grupo de conversación.
+* **Chat en tiempo real:**
+    * Los usuarios pueden enviar mensajes a otros usuarios en línea.
+    * Cada usuario tiene su propia ventana de chat.
+* **Selección de destinatario:**
+    * Un menú desplegable permite elegir el usuario destinatario del mensaje.
+* **Historial de mensajes:**
+    * La ventana de chat muestra el historial de mensajes enviados y recibidos, incluyendo los nombres de usuario de los remitentes y destinatarios.
+* **Limpieza de historial:**
+    * Cada usuario puede borrar su historial de mensajes.
 
-## Uso
-
-1.  **Iniciar:** Ingresar un nombre de usuario.
-2.  **Chatear:** Seleccionar destinatario y enviar mensajes.
-3.  **Ver historial:** Revisar la conversación.
-4.  **Limpiar historial:** Borrar la conversación.
-
-## Nota
-
-* Funciona solo en la misma máquina.
-* Interfaz simple y directa.
+## Consideraciones
+* Este chat está diseñado para funcionar en la misma máquina, por lo que los usuarios deben estar en el mismo entorno local.
+* La interfaz de usuario es simple y directa, enfocada en la funcionalidad principal de la conversación.
