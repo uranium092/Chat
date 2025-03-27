@@ -33,7 +33,7 @@ Este proyecto es un chat de conversación local que permite a los usuarios comun
 3. **Ejecutar (Primero)`Server.jar`:** Da doble click sobre `Server.jar` o ejecuta `java -jar Server.jar`. Se abrirá una ventana que registrará la comunicación entre clientes. Solo necesita ejecutarlo una vez.
 4. **Ejecutar `Client.jar`:**
    * ***Asegúrate*** que `Server.jar` ya esté en ejecución, de lo contrario, sigue el paso anterior.
-   * Ejecute `Client.jar` (doble clic o `java -jar Client.jar`) para iniciar una sesión de chat. Cada ejecución crea un nuevo usuario en la red. Por ejemplo, dos ejecuciones crean dos usuarios que pueden chatear entre sí.
+   * Ejecute `Client.jar` (doble clic o `java -jar Client.jar`) cuantas veces quieras para iniciar una sesión de chat. Cada ejecución crea un nuevo usuario en la red. Por ejemplo, dos ejecuciones crean dos usuarios que pueden chatear entre sí.
 
 ## Consideraciones
 * Si lo llega a probar, Asegúrese que `Server.jar` esté antes en ejecución que `Client.jar`
